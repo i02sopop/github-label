@@ -1,5 +1,6 @@
 From perl:latest
 
-COPY label.pl /label.pl
+RUN cpan -i JSON Data::Dumper
+COPY labels.pl /labels.pl
 
-ENTRYPOINT ["/label.pl"]
+ENTRYPOINT ["/labels.pl"]
