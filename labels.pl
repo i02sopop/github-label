@@ -34,6 +34,6 @@ sub push_event {
 if ($event_name eq 'push') {
 	push_event($event_data);
 } else {
-	print "Event $event_data without action.\n";
+	print "Event $event_name without action.\n";
 	print "Event data: " . Dumper($event_data) . "\n";
 }
