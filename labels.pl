@@ -9,7 +9,7 @@ our $uri = 'https://api.github.com';
 our $api_header = 'Accept: application/vnd.github.v3+json';
 our $auth_header = "Authorization: token $ENV{'GITHUB_TOKEN'}";
 
-print "Environment: " . Dumper($ENV) . "\n";
+print "Environment: " . Dumper(%ENV) . "\n";
 my $event_name=$ENV{'GITHUB_EVENT_NAME'};
 my $event_data=decode_json(`jq --raw-output . "$ENV{'GITHUB_EVENT_PATH'}"`);
 
