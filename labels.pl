@@ -19,7 +19,7 @@ sub get_pull {
 
 sub push_event {
 	my $event_data = shift;
-	my $url = "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/pulls"
+	my $url = "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/pulls";
 
 	my $num_commits = len($event_data->{'commits'});
 	print "Number of commits: $num_commits";
@@ -35,4 +35,5 @@ if ($event_name eq 'push') {
 	push_event($event_data);
 } else {
 	print "Event $_ without action.\n";
+	print "Event data: " . Dumper($event_data) . "\n";
 }
