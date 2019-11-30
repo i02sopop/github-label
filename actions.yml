@@ -1,0 +1,16 @@
+name: "Github labels"
+author: "Ritho"
+description: "Set the labels on a PR"
+inputs:
+  label:
+    description: "Label to set"
+    required: false
+    default: ""
+outputs:
+  label:
+    description: "Label set"
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.label }}

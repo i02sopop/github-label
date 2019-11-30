@@ -1,0 +1,30 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use JSON;
+use Data::Dumper;
+
+our $uri = 'https://api.github.com';
+our $api_header = 'Accept: application/vnd.github.v3+json';
+our $auth_header = "Authorization: token $ENV{'GITHUB_TOKEN'}";
+
+my $event_name=$ENV{'GITHUB_EVENT_NAME'};
+my $event_data=decode_json(`jq --raw-output . "$ENV{'GITHUB_EVENT_PATH'}"`);
+
+sub get_pull {
+	my $body=decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/pulls"`);
+	print "pull requests: " . Dumper($body);
+}
+
+sub push_event {
+	my $event_data = shift;
+
+	print "Event data: " . Dumper($event_data) . "\n";
+}
+
+if ($event_name eq 'push') {
+	push_event($event_data);
+} else {
+	print "Event $_ without action.\n";
+}
