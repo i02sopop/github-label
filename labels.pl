@@ -19,7 +19,15 @@ sub get_pull {
 
 sub push_event {
 	my $event_data = shift;
+	my $url = "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/pulls"
 
+	my $num_commits = len($event_data->{'commits'});
+	print "Number of commits: $num_commits";
+	foreach my $commit (@{$event_data->{'commits'}}) {
+		print "id: " . $commit->{'id'} . "\n";
+	}
+
+	print Dumper($ENV);
 	print "Event data: " . Dumper($event_data) . "\n";
 }
 
