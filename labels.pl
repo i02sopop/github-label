@@ -22,9 +22,9 @@ sub push_event {
 	my $event_data = shift;
 	my $url = "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/pulls";
 
-	my $num_commits = length(@{$event_data->{'commits'}});
+	my $num_commits = @{$event_data->{'head_commit'}->{'commits'}};
 	print "Number of commits: $num_commits";
-	foreach my $commit (@{$event_data->{'commits'}}) {
+	foreach my $commit (@{$event_data->{'head_commit'}->{'commits'}}) {
 		print "id: " . $commit->{'id'} . "\n";
 	}
 
@@ -33,6 +33,8 @@ sub push_event {
 
 if ($event_name eq 'push') {
 	push_event($event_data);
+} else if ($event_name eq 'push') {
+	print "Event data: " . Dumper($event_data) . "\n";
 } else {
 	print "Event $event_name without action.\n";
 	print "Event data: " . Dumper($event_data) . "\n";
