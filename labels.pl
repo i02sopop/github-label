@@ -47,6 +47,12 @@ sub comment_event {
 	my $url = "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/pulls";
 
 	if ($event_data->{'action'} eq 'created') {
+		print "Action created\n";
+		if (not defined $event_data->{'issue'}->{'milestone'}) {
+			assign_milestone($event_data->{'issue'}->{'id'})
+		}
+	if ($event_data->{'action'} eq 'deleted') {
+		print "Action deleted\n";
 		if (not defined $event_data->{'issue'}->{'milestone'}) {
 			assign_milestone($event_data->{'issue'}->{'id'})
 		}
