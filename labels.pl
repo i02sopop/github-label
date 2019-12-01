@@ -18,6 +18,14 @@ sub get_pull {
 	print "pull requests: " . Dumper($body);
 }
 
+sub assign_milestone {
+	my $issue_id = shift;
+	my $url = "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/milestones";
+
+	my $milestones = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "${url}"`);
+	print "Milestones: " . Dumper($milestones) . "\n";
+}
+
 sub push_event {
 	my $event_data = shift;
 	my $url = "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/pulls";
@@ -27,15 +35,33 @@ sub push_event {
 	foreach my $commit (@$event_data->{'commits'}) {
 		print "id: " . Dumper($commit) . "\n";
 	}
-
-	print "Event data: " . Dumper($event_data) . "\n";
 }
 
+sub pr_event {
+	my $event_data = shift;
+	my $url = "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/pulls";
+}
+
+sub comment_event {
+	my $event_data = shift;
+	my $url = "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/pulls";
+
+	if ($event_data->{'action'} eq 'created') {
+		if (not defined $event_data->{'issue'}->{'milestone'}) {
+			assign_milestone($event_data->{'issue'}->{'id'})
+		}
+	} else {
+		print "Action: " . $event_data->{'action'} . "\n";
+	}
+}
+
+print "Event data: " . Dumper($event_data) . "\n";
 if ($event_name eq 'push') {
 	push_event($event_data);
 } elsif ($event_name eq 'pull_request') {
-	print "Event data: " . Dumper($event_data) . "\n";
+	pr_event($event_data);
+} elsif ($event_name eq 'issue_comment') {
+	comment_event($event_data);
 } else {
 	print "Event $event_name without action.\n";
-	print "Event data: " . Dumper($event_data) . "\n";
 }
