@@ -15,7 +15,7 @@ my $event_data=decode_json(`jq --raw-output . "$ENV{'GITHUB_EVENT_PATH'}"`);
 
 sub get_pull {
 	my $body=decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/pulls"`);
-	print "pull requests: " . Dumper($body);
+	print "pull requests: " . Dumper($body) . "\n";
 }
 
 sub assign_milestone {
@@ -51,7 +51,7 @@ sub comment_event {
 		if (not defined $event_data->{'issue'}->{'milestone'}) {
 			assign_milestone($event_data->{'issue'}->{'id'});
 		}
-	if ($event_data->{'action'} eq 'deleted') {
+	} elsif ($event_data->{'action'} eq 'deleted') {
 		print "Action deleted\n";
 		if (not defined $event_data->{'issue'}->{'milestone'}) {
 			assign_milestone($event_data->{'issue'}->{'id'});
