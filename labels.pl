@@ -9,17 +9,22 @@ our $uri = 'https://api.github.com';
 our $api_header = 'Accept: application/vnd.github.v3+json';
 our $auth_header = "Authorization: token $ENV{'GITHUB_TOKEN'}";
 
-print "Environment: " . Dumper(%ENV) . "\n";
-my $event_name=$ENV{'GITHUB_EVENT_NAME'};
-my $event_data=decode_json(`jq --raw-output . "$ENV{'GITHUB_EVENT_PATH'}"`);
-
 sub get_pull {
 	my $body=decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/pulls"`);
 	print "pull requests: " . Dumper($body) . "\n";
 }
 
+sub add_label {
+	my $label = shift;
+}
+
+sub delete_label {
+	my $label = shift;
+}
+
 sub assign_milestone {
-	my $issue_id = shift;
+	my $pr = shift;
+	my $milestone = shift;
 	my $url = "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/milestones";
 
 	my $milestones = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "${url}"`);
@@ -46,6 +51,9 @@ sub comment_event {
 	my $event_data = shift;
 	my $url = "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/pulls";
 
+	my $prs = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "${url}"`);
+	print "Pull Requests: " . Dumper($prs) . "\n";
+
 	if ($event_data->{'action'} eq 'created') {
 		print "Action created\n";
 		if (not defined $event_data->{'issue'}->{'milestone'}) {
@@ -61,7 +69,11 @@ sub comment_event {
 	}
 }
 
+print "Environment: " . Dumper(%ENV) . "\n";
+my $event_name=$ENV{'GITHUB_EVENT_NAME'};
+my $event_data=decode_json(`jq --raw-output . "$ENV{'GITHUB_EVENT_PATH'}"`);
 print "Event data: " . Dumper($event_data) . "\n";
+
 if ($event_name eq 'push') {
 	push_event($event_data);
 } elsif ($event_name eq 'pull_request') {
