@@ -15,7 +15,7 @@ sub get_pull_request {
 	print "pull requests: " . Dumper($body) . "\n";
 
 	for my $pr (@$body) {
-		my $commits_url = $pr->{'_links'}->{'commits'};
+		my $commits_url = $pr->{'_links'}->{'commits'}->{'href'};
 		my $commits = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "$commits_url"`);
 		for my $c (@$commits) {
 			if ($c->{'id'} == $commit) {
