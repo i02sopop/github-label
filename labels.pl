@@ -40,8 +40,8 @@ sub push_event {
 	foreach my $commit (@{$event_data->{'commits'}}) {
 		print "Commit info: " . Dumper($commit) . "\n";
 		my $curl = $commit->{'url'};
-		print "Checking commit data at $curl";
-		my $c = `curl -sSL -H "$auth_header" -H "$api_header" "$curl"`;
+		print "Checking commit data at $curl\n";
+		my $c = `curl -sSL "$curl"`;
 		print "Commit response: " . Dumper($c) . "\n";
 		my $c_json = decode_json($c);
 		print "Commit data: " . Dumper($c_json) . "\n";
