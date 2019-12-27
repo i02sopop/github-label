@@ -9,9 +9,12 @@ our $uri = 'https://api.github.com';
 our $api_header = 'Accept: application/vnd.github.v3+json';
 our $auth_header = "Authorization: token $ENV{'GITHUB_TOKEN'}";
 
-sub get_pull {
+sub get_pull_request {
+	my $commit = shift;
 	my $body=decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/pulls"`);
 	print "pull requests: " . Dumper($body) . "\n";
+
+	return 0;
 }
 
 sub add_label {
@@ -32,6 +35,7 @@ sub assign_milestone {
 }
 
 sub push_event {
+	# /repos/:owner/:repo/pulls/:pull_number/commits
 	my $event_data = shift;
 	my $url = "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/pulls";
 
@@ -40,8 +44,12 @@ sub push_event {
 	foreach my $commit (@{$event_data->{'commits'}}) {
 		print "Commit info: " . Dumper($commit) . "\n";
 		my $curl = $commit->{'url'};
+
+		my $pr = get_pull_request($commit->{'id'});
+		print "Pull request: $pr\n";
+
 		print "Checking commit data at $curl\n";
-		my $c = `curl -sSL "$curl"`;
+		my $c = `curl -sSL -H "$auth_header" -H "$api_header" "$curl"`;
 		print "Commit response: " . Dumper($c) . "\n";
 		my $c_json = decode_json($c);
 		print "Commit data: " . Dumper($c_json) . "\n";
