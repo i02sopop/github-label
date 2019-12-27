@@ -11,8 +11,18 @@ our $auth_header = "Authorization: token $ENV{'GITHUB_TOKEN'}";
 
 sub get_pull_request {
 	my $commit = shift;
-	my $body=decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/pulls"`);
+	my $body = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/pulls"`);
 	print "pull requests: " . Dumper($body) . "\n";
+
+	for my $pr (@$body) {
+		my $commits_url = $pr->{'_links'}->{'commits'};
+		my $commits = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "$commits_url"`);
+		for my $c (@$commits) {
+			if ($c->{'id'} == $commit) {
+				print "Commit matched: " , Dumper($c) . "\n";
+			}
+		}
+	}
 
 	return 0;
 }
