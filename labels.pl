@@ -38,7 +38,10 @@ sub push_event {
 	my $num_commits = @{$event_data->{'commits'}};
 	print "Number of commits: $num_commits\n";
 	foreach my $commit (@{$event_data->{'commits'}}) {
-		print "id: " . Dumper($commit) . "\n";
+		print "Commit info: " . Dumper($commit) . "\n";
+		my $curl = $commit->{'url'};
+		my $c = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "${curl}"`);
+		print "Commit data: " . Dumper($c) . "\n";
 	}
 }
 
