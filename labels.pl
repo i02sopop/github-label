@@ -39,7 +39,7 @@ sub assign_milestone {
 	my $milestone = shift;
 	my $url = "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/milestones";
 
-	print "Undefined issue.\n" unless defined $issue;
+	print "Undefined issue url.\n" unless defined $issue_url;
 	print "Undefined milestone\n" unless defined $milestone;
 
 	my $milestones = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "${url}"`);
