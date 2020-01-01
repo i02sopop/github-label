@@ -48,7 +48,7 @@ sub assign_milestone {
 		print "Milestone: " . Dumper($ms) . "\n";
 		my $mid = $ms->{'id'};
 		if ($ms->{'title'} eq $milestone) {
-			my $res = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" -d '{"milestone": $mid}' "$issue_url"`)
+			my $res = decode_json(`curl -sSL -X PATCH -H "$auth_header" -H "$api_header" -d '{"milestone": $mid}' "$issue_url"`)
 		}
 	}
 }
