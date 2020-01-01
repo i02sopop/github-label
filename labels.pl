@@ -35,17 +35,21 @@ sub delete_label {
 }
 
 sub assign_milestone {
-	my $pr = shift;
+	my $issue_url = shift;
 	my $milestone = shift;
 	my $url = "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/milestones";
 
-	print "Undefined pull request.\n" unless defined $pr;
-	# print "Undefined milestone\n" unless defined $milestone;
+	print "Undefined issue.\n" unless defined $issue;
+	print "Undefined milestone\n" unless defined $milestone;
 
 	my $milestones = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "${url}"`);
 	print "Milestones: " . Dumper($milestones) . "\n";
 	foreach my $ms (@$milestones) {
 		print "Milestone: " . Dumper($ms) . "\n";
+		my $mid = $ms->{'id'};
+		if ($ms->{'title'} == $milestone) {
+			my $res = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" -d '{"milestone": $mid}' "$issue_url"`)
+		}
 	}
 }
 
@@ -63,11 +67,11 @@ sub push_event {
 		my $pr = get_pull_request($commit->{'id'});
 		print "Pull request: " . Dumper($pr) . "\n";
 
-		if ($pr->{'state'} != 'open') {
+		if ($pr->{'state'} ne 'open') {
 			return;
 		}
 
-		assign_milestone($pr->{'number'}, 'Milestone 1')
+		assign_milestone($pr->{'issue_url'}, 'Test')
 			unless defined $pr->{'milestone'};
 
 		print "Checking commit data at $curl\n";
