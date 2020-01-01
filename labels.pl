@@ -21,6 +21,7 @@ sub get_pull_request {
 			print "Checking commit " . $c->{'id'} . " against commit " . Dumper($c) . "\n";
 			if ($c->{'id'} == $commit) {
 				print "Commit matched\n";
+				return $pr;
 			}
 		}
 	}
@@ -57,10 +58,11 @@ sub push_event {
 		my $curl = $commit->{'url'};
 
 		my $pr = get_pull_request($commit->{'id'});
-		print "Pull request: $pr\n";
+		print "Pull request: " . Dumper($pr) . "\n";
 
 		print "Checking commit data at $curl\n";
-		my $c = `curl -sSL -H "$auth_header" -H "$api_header" "$curl"`;
+		#my $c = `curl -sSL -H "$auth_header" -H "$api_header" "$curl"`;
+		my $c = `curl -sSL "$curl"`;
 		print "Commit response: " . Dumper($c) . "\n";
 		my $c_json = decode_json($c);
 		print "Commit data: " . Dumper($c_json) . "\n";
