@@ -47,7 +47,7 @@ sub assign_milestone {
 	foreach my $ms (@$milestones) {
 		print "Milestone: " . Dumper($ms) . "\n";
 		my $mid = $ms->{'id'};
-		if ($ms->{'title'} == $milestone) {
+		if ($ms->{'title'} eq $milestone) {
 			my $res = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" -d '{"milestone": $mid}' "$issue_url"`)
 		}
 	}
