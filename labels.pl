@@ -43,12 +43,13 @@ sub assign_milestone {
 	print "Undefined milestone\n" unless defined $milestone;
 
 	my $milestones = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "${url}"`);
-	print "Milestones: " . Dumper($milestones) . "\n";
 	foreach my $ms (@$milestones) {
 		print "Milestone: " . Dumper($ms) . "\n";
 		my $mid = $ms->{'id'};
 		if ($ms->{'title'} eq $milestone) {
-			my $res = decode_json(`curl -sSL -X PATCH -H "$auth_header" -H "$api_header" -d '{"milestone": $mid}' "$issue_url"`)
+			print "Milestone $milestone matched";
+			my $res = decode_json(`curl -sSL -X PATCH -H "$auth_header" -H "$api_header" -d '{"milestone": $mid}' "$issue_url"`);
+			print "Milestone set result: " . Dumper($res) . "\n";
 		}
 	}
 }
