@@ -12,15 +12,12 @@ our $auth_header = "Authorization: token $ENV{'GITHUB_TOKEN'}";
 sub get_pull_request {
 	my $commit = shift;
 	my $body = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/pulls"`);
-	print "pull requests: " . Dumper($body) . "\n";
 
 	for my $pr (@$body) {
 		my $commits_url = $pr->{'_links'}->{'commits'}->{'href'};
 		my $commits = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "$commits_url"`);
 		for my $c (@$commits) {
-			print "Checking commit " . $c->{'id'} . " against commit " . Dumper($c) . "\n";
 			if ($c->{'id'} == $commit) {
-				print "Commit matched\n";
 				return $pr;
 			}
 		}
@@ -60,9 +57,15 @@ sub push_event {
 		my $pr = get_pull_request($commit->{'id'});
 		print "Pull request: " . Dumper($pr) . "\n";
 
+		if ($pr->{'state'} != 'open') {
+			return;
+		}
+
+		assign_milestone($pr->{'number'}, 'Milestone 1')
+			unless defined $pr->{'milestone'};
+
 		print "Checking commit data at $curl\n";
-		#my $c = `curl -sSL -H "$auth_header" -H "$api_header" "$curl"`;
-		my $c = `curl -sSL "$curl"`;
+		my $c = `curl -sSL -H "$auth_header" -H "$api_header" "$curl"`;
 		print "Commit response: " . Dumper($c) . "\n";
 		my $c_json = decode_json($c);
 		print "Commit data: " . Dumper($c_json) . "\n";
