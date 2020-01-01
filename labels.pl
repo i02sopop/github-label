@@ -9,6 +9,7 @@ our $uri = 'https://api.github.com';
 our $api_header = 'Accept: application/vnd.github.v3+json';
 our $auth_header = "Authorization: token $ENV{'GITHUB_TOKEN'}";
 
+# Pull requests
 sub get_pull_request {
 	my $commit = shift;
 	my $body = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/pulls"`);
@@ -26,6 +27,45 @@ sub get_pull_request {
 	return 0;
 }
 
+# Milestones
+sub get_milestone {
+	my $milestone = shift;
+	my $url = "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/milestones";
+
+	print "Undefined milestone\n" unless defined $milestone;
+	my $milestones = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "${url}"`);
+	foreach my $ms (@$milestones) {
+		if ($ms->{'title'} eq $milestone) {
+			return $ms;
+		}
+	}
+}
+
+sub assign_milestone {
+	my $issue_url = shift;
+	my $milestone_title = shift;
+
+	my $milestone = get_milestone($milestone_title);
+	if (defined $milestone) {
+		my $res = decode_json(`curl -sSL -X PATCH -H "$auth_header" -H "$api_header" -d '{"milestone": $mid}' "$issue_url"`);
+		print "Milestone set result: " . Dumper($res) . "\n"
+			if defined $res->{'errors'};
+	}
+}
+
+sub unassign_milestone {
+	my $issue_url = shift;
+	my $milestone_title = shift;
+
+	my $milestone = get_milestone($milestone_title);
+	if (defined $milestone) {
+		my $res = decode_json(`curl -sSL -X PATCH -H "$auth_header" -H "$api_header" -d '{"milestone": null}' "$issue_url"`);
+		print "Milestone set result: " . Dumper($res) . "\n"
+			if defined $res->{'errors'};
+	}
+}
+
+# Labels
 sub add_label {
 	my $label = shift;
 }
@@ -34,29 +74,8 @@ sub delete_label {
 	my $label = shift;
 }
 
-sub assign_milestone {
-	my $issue_url = shift;
-	my $milestone = shift;
-	my $url = "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/milestones";
-
-	print "Undefined issue url.\n" unless defined $issue_url;
-	print "Undefined milestone\n" unless defined $milestone;
-
-	my $milestones = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "${url}"`);
-	foreach my $ms (@$milestones) {
-		print "Milestone: " . Dumper($ms) . "\n";
-		my $mid = $ms->{'number'};
-		if ($ms->{'title'} eq $milestone) {
-			print "Milestone $milestone matched\n";
-			my $res = decode_json(`curl -sSL -X PATCH -H "$auth_header" -H "$api_header" -d '{"milestone": $mid}' "$issue_url"`);
-			print "Milestone set result: " . Dumper($res) . "\n"
-				if defined $res->{'errors'};
-		}
-	}
-}
-
+# Events
 sub push_event {
-	# /repos/:owner/:repo/pulls/:pull_number/commits
 	my $event_data = shift;
 	my $url = "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/pulls";
 
