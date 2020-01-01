@@ -39,8 +39,14 @@ sub assign_milestone {
 	my $milestone = shift;
 	my $url = "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/milestones";
 
+	print "Undefined pull request.\n" unless defined $pr;
+	# print "Undefined milestone\n" unless defined $milestone;
+
 	my $milestones = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "${url}"`);
 	print "Milestones: " . Dumper($milestones) . "\n";
+	foreach my $ms (@$milestones) {
+		print "Milestone: " . Dumper($ms) . "\n";
+	}
 }
 
 sub push_event {
