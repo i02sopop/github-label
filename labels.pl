@@ -49,7 +49,8 @@ sub assign_milestone {
 		if ($ms->{'title'} eq $milestone) {
 			print "Milestone $milestone matched\n";
 			my $res = decode_json(`curl -sSL -X PATCH -H "$auth_header" -H "$api_header" -d '{"milestone": $mid}' "$issue_url"`);
-			print "Milestone set result: " . Dumper($res) . "\n";
+			print "Milestone set result: " . Dumper($res) . "\n"
+				if defined $res->{'errors'};
 		}
 	}
 }
