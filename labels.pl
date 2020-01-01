@@ -45,9 +45,9 @@ sub assign_milestone {
 	my $milestones = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "${url}"`);
 	foreach my $ms (@$milestones) {
 		print "Milestone: " . Dumper($ms) . "\n";
-		my $mid = $ms->{'id'};
+		my $mid = $ms->{'number'};
 		if ($ms->{'title'} eq $milestone) {
-			print "Milestone $milestone matched";
+			print "Milestone $milestone matched\n";
 			my $res = decode_json(`curl -sSL -X PATCH -H "$auth_header" -H "$api_header" -d '{"milestone": $mid}' "$issue_url"`);
 			print "Milestone set result: " . Dumper($res) . "\n";
 		}
