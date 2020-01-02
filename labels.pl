@@ -19,7 +19,7 @@ sub get_pull_request {
 		my $commits = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "$commits_url"`);
 		for my $c (@$commits) {
 			my $id = $c->{'id'};
-			if ("$id" eq "$commit") {
+			if (defined $id && "$id" eq "$commit") {
 				return $pr;
 			}
 		}
