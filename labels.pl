@@ -47,7 +47,7 @@ sub assign_milestone {
 
 	my $milestone = get_milestone($milestone_title);
 	if (defined $milestone) {
-		my $res = decode_json(`curl -sSL -X PATCH -H "$auth_header" -H "$api_header" -d '{"milestone": $mid}' "$issue_url"`);
+		my $res = decode_json(`curl -sSL -X PATCH -H "$auth_header" -H "$api_header" -d '{"milestone": $milestone->{"number"}}' "$issue_url"`);
 		print "Milestone set result: " . Dumper($res) . "\n"
 			if defined $res->{'errors'};
 	}
