@@ -18,7 +18,8 @@ sub get_pull_request {
 		my $commits_url = $pr->{'_links'}->{'commits'}->{'href'};
 		my $commits = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "$commits_url"`);
 		for my $c (@$commits) {
-			if ($c->{'id'} eq $commit) {
+			my $id = $c->{'id'};
+			if ("$id" eq "$commit") {
 				return $pr;
 			}
 		}
