@@ -19,7 +19,7 @@ sub get_pull_request {
 		my $commits = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "$commits_url"`);
 		for my $c (@$commits) {
 			my $id = $c->{'id'};
-			if (defined $id && "$id" eq "$commit") {
+			if (defined $id && $id == $commit) {
 				return $pr;
 			}
 		}
@@ -89,8 +89,12 @@ sub push_event {
 
 		my $pr = get_pull_request($commit->{'id'});
 		# print "Pull request: " . Dumper($pr) . "\n";
+		if ($pr == 0) {
+			print "Unable to get Pull Request.\n";
+			return;
+		}
 
-		print "Has project? " . Dumper($pr) . "\n";
+		print "Has project? " . Dumper($pr->{'base'}->{'repo'})->{'has_project'} . "\n";
 
 		if ($pr->{'state'} ne 'open') {
 			return;
