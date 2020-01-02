@@ -90,7 +90,7 @@ sub push_event {
 		my $pr = get_pull_request($commit->{'id'});
 		# print "Pull request: " . Dumper($pr) . "\n";
 
-		print "Has project? " . Dumper($pr->{'base'}) . "\n";
+		print "Has project? " . Dumper($pr) . "\n";
 
 		if ($pr->{'state'} ne 'open') {
 			return;
