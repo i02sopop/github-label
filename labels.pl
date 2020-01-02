@@ -18,7 +18,7 @@ sub get_pull_request {
 		my $commits_url = $pr->{'_links'}->{'commits'}->{'href'};
 		my $commits = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "$commits_url"`);
 		for my $c (@$commits) {
-			if ($c->{'id'} == $commit) {
+			if ($c->{'id'} eq $commit) {
 				return $pr;
 			}
 		}
@@ -68,6 +68,7 @@ sub unassign_milestone {
 # Labels
 sub add_label {
 	my $label = shift;
+	# my $res = decode_json(`curl -sSL -X PATCH -H "$auth_header" -H "$api_header" -d '{"labels": []}' "$issue_url"`);
 }
 
 sub delete_label {
@@ -87,6 +88,8 @@ sub push_event {
 
 		my $pr = get_pull_request($commit->{'id'});
 		print "Pull request: " . Dumper($pr) . "\n";
+
+		print "Has project? " . $pr->{'base'}->{'repo'}->{'has_project'} . "\n";
 
 		if ($pr->{'state'} ne 'open') {
 			return;
