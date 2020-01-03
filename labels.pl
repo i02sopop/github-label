@@ -111,7 +111,8 @@ sub push_event {
 	if (has_milestone()) {
 		my $defaultCommit = $event_data->{'commits'}[0];
 		my $pr = get_pull_request($defaultCommit->{'id'});
-		if (defined $ENV{'INPUT_CLEAN_MILESTONE'}) {
+		if (defined $ENV{'INPUT_CLEAN_MILESTONE'} &&
+			$ENV{'INPUT_CLEAN_MILESTONE'} != 0) {
 			unassign_milestone($pr);
 		} else {
 			assign_milestone($pr);
