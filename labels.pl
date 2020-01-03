@@ -86,12 +86,12 @@ sub push_event {
 		my $curl = $commit->{'url'};
 
 		my $pr = get_pull_request($commit->{'id'});
-		# print "Pull request: " . Dumper($pr) . "\n";
 		unless (defined $pr) {
 			print "Unable to get Pull Request.\n";
 			return;
 		}
 
+		print "Pull request: " . Dumper($pr) . "\n";
 		print "Has project? " . Dumper($pr->{'base'}->{'repo'}->{'has_project'}) . "\n";
 
 		if ($pr->{'state'} ne 'open') {
