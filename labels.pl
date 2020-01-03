@@ -126,6 +126,8 @@ sub push_event {
 sub pr_event {
 	my $event_data = shift;
 	my $url = "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/pulls";
+
+	exit(-1);
 }
 
 sub comment_event {
@@ -150,10 +152,10 @@ sub comment_event {
 	}
 }
 
-# print "Environment: " . Dumper(%ENV) . "\n";
+print "Environment: " . Dumper(%ENV) . "\n";
 my $event_name=$ENV{'GITHUB_EVENT_NAME'};
 my $event_data=decode_json(`jq --raw-output . "$ENV{'GITHUB_EVENT_PATH'}"`);
-# print "Event data: " . Dumper($event_data) . "\n";
+print "Event data: " . Dumper($event_data) . "\n";
 
 if ($event_name eq 'push') {
 	push_event($event_data);
