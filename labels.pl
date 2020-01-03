@@ -27,40 +27,68 @@ sub get_pull_request {
 }
 
 # Milestones
-sub get_milestone {
-	my $milestone = shift;
-	my $url = "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/milestones";
+sub has_milestone {
+	return defined $ENV{'INPUT_MILESTONE'};
+}
 
-	print "Undefined milestone\n" unless defined $milestone;
-	my $milestones = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "${url}"`);
-	foreach my $ms (@$milestones) {
-		if ($ms->{'title'} eq $milestone) {
-			return $ms;
+sub get_milestone_title {
+	return $ENV{'INPUT_MILESTONE'};
+}
+
+sub milestone_assigned {
+	my $pr = shift;
+	my $milestone = shift;
+
+	if (!defined $milestone ||
+		!defined $pr ||
+		!defined $pr->{'milestone'}) {
+		return 0;
+	}
+
+	print "Milestone: " . Dumper($milestone) . "\n";
+
+	return $pr->{'milestone'}->{'id'} != $milestone->{'id'};
+}
+
+sub get_milestone {
+	if (has_milestone()) {
+		my $milestone_title = get_milestone_title();
+		my $url = "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/milestones";
+		my $milestones = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "${url}"`);
+		foreach my $milestone (@$milestones) {
+			if ($milestone->{'title'} eq $milestone_title) {
+				return $milestone;
+			}
 		}
 	}
 }
 
 sub assign_milestone {
-	my $issue_url = shift;
-	my $milestone_title = shift;
+	my $pr = shift;
 
-	my $milestone = get_milestone($milestone_title);
-	if (defined $milestone) {
-		my $res = decode_json(`curl -sSL -X PATCH -H "$auth_header" -H "$api_header" -d '{"milestone": $milestone->{"number"}}' "$issue_url"`);
-		print "Milestone set result: " . Dumper($res) . "\n"
-			if defined $res->{'errors'};
+	if (defined $pr and $pr->{'state'} eq 'open') {
+		my $issue_url = $pr->{'issue_url'};
+		my $milestone = get_milestone();
+		if (defined $milestone && !milestone_assigned($pr, $milestone)) {
+			my $res = decode_json(`curl -sSL -X PATCH -H "$auth_header" -H "$api_header" -d '{"milestone": $milestone->{"number"}}' "$issue_url"`);
+			print "Milestone set result: " . Dumper($res) . "\n"
+				if defined $res->{'errors'};
+		} else {
+			print "Milestone already assigned.\n";
+		}
 	}
 }
 
 sub unassign_milestone {
-	my $issue_url = shift;
-	my $milestone_title = shift;
-
-	my $milestone = get_milestone($milestone_title);
-	if (defined $milestone) {
-		my $res = decode_json(`curl -sSL -X PATCH -H "$auth_header" -H "$api_header" -d '{"milestone": null}' "$issue_url"`);
-		print "Milestone set result: " . Dumper($res) . "\n"
-			if defined $res->{'errors'};
+	my $pr = shift;
+	if (defined $pr and $pr->{'state'} eq 'open') {
+		my $issue_url = $pr->{'issue_url'};
+		my $milestone = get_milestone();
+		if (defined $milestone && milestone_assigned($pr, $milestone)) {
+			my $res = decode_json(`curl -sSL -X PATCH -H "$auth_header" -H "$api_header" -d '{"milestone": null}' "$issue_url"`);
+			print "Milestone set result: " . Dumper($res) . "\n"
+				if defined $res->{'errors'};
+		}
 	}
 }
 
@@ -79,29 +107,24 @@ sub push_event {
 	my $event_data = shift;
 	my $url = "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/pulls";
 
+	# Set the milestone.
+	if (has_milestone()) {
+		my $defaultCommit = $event_data->{'commits'}[0];
+		my $pr = get_pull_request($defaultCommit->{'id'});
+		if (defined $ENV{'INPUT_CLEAN_MILESTONE'}) {
+			unassign_milestone($pr);
+		} else {
+			assign_milestone($pr);
+		}
+	}
+
+	print "Pull request: " . Dumper($pr) . "\n";
+
 	my $num_commits = @{$event_data->{'commits'}};
 	print "Number of commits: $num_commits\n";
 	foreach my $commit (@{$event_data->{'commits'}}) {
 		print "Commit info: " . Dumper($commit) . "\n";
 		my $curl = $commit->{'url'};
-
-		my $pr = get_pull_request($commit->{'id'});
-		unless (defined $pr) {
-			print "Unable to get Pull Request.\n";
-			return;
-		}
-
-		print "Pull request: " . Dumper($pr) . "\n";
-		print "Has project? " . Dumper($pr->{'head'}->{'repo'}->{'has_project'}) . "\n";
-
-		if ($pr->{'state'} ne 'open') {
-			return;
-		}
-
-		if (defined defined $ENV{'INPUT_MILESTONE'}) {
-			assign_milestone($pr->{'issue_url'}, $ENV{'INPUT_MILESTONE'})
-				unless defined $pr->{'milestone'};
-		}
 
 		print "Checking commit data at $curl\n";
 		my $c = `curl -sSL -H "$auth_header" -H "$api_header" "$curl"`;
