@@ -24,6 +24,8 @@ sub get_pull_request {
 			}
 		}
 	}
+
+	return;
 }
 
 # Milestones
@@ -59,6 +61,8 @@ sub get_milestone {
 			}
 		}
 	}
+
+	return;
 }
 
 sub assign_milestone {
