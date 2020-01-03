@@ -71,8 +71,6 @@ sub assign_milestone {
 			my $res = decode_json(`curl -sSL -X PATCH -H "$auth_header" -H "$api_header" -d '{"milestone": $milestone->{"number"}}' "$issue_url"`);
 			print "Milestone set result: " . Dumper($res) . "\n"
 				if defined $res->{'errors'};
-		} else {
-			print "Milestone already assigned.\n";
 		}
 	}
 }
@@ -116,21 +114,14 @@ sub push_event {
 			assign_milestone($pr);
 		}
 
-		print "Pull request: " . Dumper($pr) . "\n";
+		# print "Pull request: " . Dumper($pr) . "\n";
 	}
 
-	my $num_commits = @{$event_data->{'commits'}};
-	print "Number of commits: $num_commits\n";
-	foreach my $commit (@{$event_data->{'commits'}}) {
-		print "Commit info: " . Dumper($commit) . "\n";
-		my $curl = $commit->{'url'};
-
-		print "Checking commit data at $curl\n";
-		my $c = `curl -sSL -H "$auth_header" -H "$api_header" "$curl"`;
-		print "Commit response: " . Dumper($c) . "\n";
-		my $c_json = decode_json($c);
-		print "Commit data: " . Dumper($c_json) . "\n";
-	}
+	# my $num_commits = @{$event_data->{'commits'}};
+	# print "Number of commits: $num_commits\n";
+	# foreach my $commit (@{$event_data->{'commits'}}) {
+	#	print "Commit info: " . Dumper($commit) . "\n";
+	# }
 }
 
 sub pr_event {
@@ -160,10 +151,10 @@ sub comment_event {
 	}
 }
 
-print "Environment: " . Dumper(%ENV) . "\n";
+# print "Environment: " . Dumper(%ENV) . "\n";
 my $event_name=$ENV{'GITHUB_EVENT_NAME'};
 my $event_data=decode_json(`jq --raw-output . "$ENV{'GITHUB_EVENT_PATH'}"`);
-print "Event data: " . Dumper($event_data) . "\n";
+# print "Event data: " . Dumper($event_data) . "\n";
 
 if ($event_name eq 'push') {
 	push_event($event_data);
