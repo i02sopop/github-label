@@ -92,14 +92,16 @@ sub push_event {
 			return;
 		}
 
-		print "Has project? " . Dumper($pr->{'base'}->{'repo'})->{'has_project'} . "\n";
+		print "Has project? " . Dumper($pr->{'base'}->{'repo'}->{'has_project'}) . "\n";
 
 		if ($pr->{'state'} ne 'open') {
 			return;
 		}
 
-		assign_milestone($pr->{'issue_url'}, 'Test')
-			unless defined $pr->{'milestone'};
+		if (defined defined $ENV{'INPUT_MILESTONE'}) {
+			assign_milestone($pr->{'issue_url'}, $ENV{'INPUT_MILESTONE'})
+				unless defined $pr->{'milestone'};
+		}
 
 		print "Checking commit data at $curl\n";
 		my $c = `curl -sSL -H "$auth_header" -H "$api_header" "$curl"`;
