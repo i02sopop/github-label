@@ -18,16 +18,12 @@ sub get_pull_request {
 		my $commits_url = $pr->{'_links'}->{'commits'}->{'href'};
 		my $commits = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "$commits_url"`);
 		for my $c (@$commits) {
-			print "Commit info: " . Dumper($c) . "\n";
 			my $sha = $c->{'sha'};
-			print "Comparing commit id $sha against $commit\n";
 			if (defined $sha && $sha eq $commit) {
 				return $pr;
 			}
 		}
 	}
-
-	return 0;
 }
 
 # Milestones
@@ -91,9 +87,9 @@ sub push_event {
 
 		my $pr = get_pull_request($commit->{'id'});
 		# print "Pull request: " . Dumper($pr) . "\n";
-		if ($pr == 0) {
+		unless (defined $pr) {
 			print "Unable to get Pull Request.\n";
-			# return;
+			return;
 		}
 
 		print "Has project? " . Dumper($pr->{'base'}->{'repo'})->{'has_project'} . "\n";
