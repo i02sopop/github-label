@@ -18,6 +18,7 @@ sub get_pull_request {
 		my $commits_url = $pr->{'_links'}->{'commits'}->{'href'};
 		my $commits = decode_json(`curl -sSL -H "$auth_header" -H "$api_header" "$commits_url"`);
 		for my $c (@$commits) {
+			print "Commit info: " . Dumper($c) . "\n";
 			my $id = $c->{'id'};
 			print "Comparing commit id $id against $commit\n";
 			if (defined $id && $id == $commit) {
