@@ -45,8 +45,6 @@ sub milestone_assigned {
 		return 0;
 	}
 
-	print "Milestone: " . Dumper($milestone) . "\n";
-
 	return $pr->{'milestone'}->{'id'} != $milestone->{'id'};
 }
 
