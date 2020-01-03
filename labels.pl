@@ -45,7 +45,7 @@ sub milestone_assigned {
 		return 0;
 	}
 
-	return $pr->{'milestone'}->{'id'} != $milestone->{'id'};
+	return $pr->{'milestone'}->{'id'} == $milestone->{'id'};
 }
 
 sub get_milestone {
