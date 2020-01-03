@@ -37,17 +37,10 @@ sub get_milestone_title {
 	return $ENV{'INPUT_MILESTONE'};
 }
 
-sub milestone_assigned {
+sub has_milestone_assigned {
 	my $pr = shift;
-	my $milestone = shift;
 
-	if (!defined $milestone ||
-		!defined $pr ||
-		!defined $pr->{'milestone'}) {
-		return 0;
-	}
-
-	return $pr->{'milestone'}->{'id'} == $milestone->{'id'};
+	return defined $pr && defined $pr->{'milestone'};
 }
 
 sub get_milestone {
@@ -71,7 +64,7 @@ sub assign_milestone {
 	if (defined $pr and $pr->{'state'} eq 'open') {
 		my $issue_url = $pr->{'issue_url'};
 		my $milestone = get_milestone();
-		if (defined $milestone && !milestone_assigned($pr, $milestone)) {
+		if (defined $milestone && !has_milestone_assigned($pr)) {
 			my $res = decode_json(`curl -sSL -X PATCH -H "$auth_header" -H "$api_header" -d '{"milestone": $milestone->{"number"}}' "$issue_url"`);
 			print "Milestone set result: " . Dumper($res) . "\n"
 				if defined $res->{'errors'};
@@ -79,12 +72,11 @@ sub assign_milestone {
 	}
 }
 
-sub unassign_milestone {
+sub clean_milestone {
 	my $pr = shift;
 	if (defined $pr and $pr->{'state'} eq 'open') {
 		my $issue_url = $pr->{'issue_url'};
-		my $milestone = get_milestone();
-		if (defined $milestone && milestone_assigned($pr, $milestone)) {
+		if (has_milestone_assigned($pr)) {
 			my $res = decode_json(`curl -sSL -X PATCH -H "$auth_header" -H "$api_header" -d '{"milestone": null}' "$issue_url"`);
 			print "Milestone set result: " . Dumper($res) . "\n"
 				if defined $res->{'errors'};
@@ -111,12 +103,15 @@ sub push_event {
 	if (has_milestone()) {
 		my $defaultCommit = $event_data->{'commits'}[0];
 		my $pr = get_pull_request($defaultCommit->{'id'});
+
+		# If we have enabled the clean_milestone variable we clean the previous
+		# milestone assigned to the PR.
 		if (defined $ENV{'INPUT_CLEAN_MILESTONE'} &&
 			$ENV{'INPUT_CLEAN_MILESTONE'} != 0) {
-			unassign_milestone($pr);
-		} else {
-			assign_milestone($pr);
+			clean_milestone($pr);
 		}
+
+		assign_milestone($pr);
 
 		# print "Pull request: " . Dumper($pr) . "\n";
 	}
