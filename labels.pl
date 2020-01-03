@@ -116,9 +116,9 @@ sub push_event {
 		} else {
 			assign_milestone($pr);
 		}
-	}
 
-	print "Pull request: " . Dumper($pr) . "\n";
+		print "Pull request: " . Dumper($pr) . "\n";
+	}
 
 	my $num_commits = @{$event_data->{'commits'}};
 	print "Number of commits: $num_commits\n";
