@@ -92,7 +92,7 @@ sub push_event {
 		}
 
 		print "Pull request: " . Dumper($pr) . "\n";
-		print "Has project? " . Dumper($pr->{'base'}->{'repo'}->{'has_project'}) . "\n";
+		print "Has project? " . Dumper($pr->{'head'}->{'repo'}->{'has_project'}) . "\n";
 
 		if ($pr->{'state'} ne 'open') {
 			return;
