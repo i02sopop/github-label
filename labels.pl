@@ -62,6 +62,13 @@ sub assign_milestone {
 	my $pr = shift;
 
 	if (defined $pr and $pr->{'state'} eq 'open') {
+		# If we have enabled the clean_milestone variable we clean the previous
+		# milestone assigned to the PR.
+		if (defined $ENV{'INPUT_CLEAN_MILESTONE'} &&
+			$ENV{'INPUT_CLEAN_MILESTONE'} != 0) {
+			clean_milestone($pr);
+		}
+
 		my $issue_url = $pr->{'issue_url'};
 		my $milestone = get_milestone();
 		if (defined $milestone && !has_milestone_assigned($pr)) {
@@ -104,13 +111,6 @@ sub push_event {
 		my $defaultCommit = $event_data->{'commits'}[0];
 		my $pr = get_pull_request($defaultCommit->{'id'});
 
-		# If we have enabled the clean_milestone variable we clean the previous
-		# milestone assigned to the PR.
-		if (defined $ENV{'INPUT_CLEAN_MILESTONE'} &&
-			$ENV{'INPUT_CLEAN_MILESTONE'} != 0) {
-			clean_milestone($pr);
-		}
-
 		assign_milestone($pr);
 
 		# print "Pull request: " . Dumper($pr) . "\n";
@@ -126,6 +126,10 @@ sub push_event {
 sub pr_event {
 	my $event_data = shift;
 	my $url = "${uri}/repos/$ENV{'GITHUB_REPOSITORY'}/pulls";
+
+	if (has_milestone()) {
+		assign_milestone($event_data->{'pull_request'});
+	}
 
 	exit(-1);
 }
